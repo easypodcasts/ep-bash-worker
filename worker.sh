@@ -15,22 +15,24 @@ get_episode() {
     EPISODE_ID=$(jq -r '.id' <<<"${RESP}")
     echo "Got episode ID ${EPISODE_ID}"
     EPISODE_URL=$(jq -r '.url' <<<"${RESP}")
+    EPISODE_FILE="episode_${EPISODE_ID}.opus"
     echo "Got episode URL ${EPISODE_URL}"
 }
 
 convert_episode() {
     ffmpeg -y -i "${EPISODE_URL}" \
-        -ac 1 -c:a libopus -b:a 24k -vbr on -compression_level 10 \
-        -frame_duration 60 -application voip episode.opus
+        -ac 1 -c:a libopus -b:a 24k \
+        -apply_phase_inv 0 \
+        -frame_duration 60 -application voip "${EPISODE_FILE}"
 }
 
 upload_episode() {
     curl -H "${AUTH}" -F "id=${EPISODE_ID}" \
-        -F "audio=@episode.opus" "${API_ENDPOINT_CONVERTED}"
+        -F "audio=@${EPISODE_FILE}" "${API_ENDPOINT_CONVERTED}"
 }
 
 clean() {
-    rm episode.opus
+    rm "${EPISODE_FILE}"
 }
 
 while :; do
