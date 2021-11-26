@@ -36,7 +36,7 @@ clean() {
 }
 
 while :; do
-    RESP=$(curl -H "${AUTH}" "${API_ENDPOINT_NEXT}" | jq -r)
+    RESP=$(curl -s -H "${AUTH}" "${API_ENDPOINT_NEXT}" | jq -r)
 
     # RESP can be:
     # noop -> No episodes to convert
