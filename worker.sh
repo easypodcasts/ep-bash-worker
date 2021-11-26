@@ -14,7 +14,7 @@ done
 get_episode() {
     EPISODE_ID=$(jq -r '.id' <<<"${RESP}")
     echo "Got episode ID ${EPISODE_ID}"
-    EPISODE_URL=$(jq -r '.url' <<<"$RESP")
+    EPISODE_URL=$(jq -r '.url' <<<"${RESP}")
     echo "Got episode URL ${EPISODE_URL}"
 }
 
