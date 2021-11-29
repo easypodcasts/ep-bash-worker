@@ -52,7 +52,6 @@ while :; do
         break
     else
         get_episode && convert_episode && upload_episode && clean
-        
     fi
     sleep 10
 done
