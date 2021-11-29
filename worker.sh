@@ -9,6 +9,7 @@ TOOLS="jq ffmpeg"
 
 for tool in ${TOOLS}; do
     type "${tool}" > /dev/null 2>&1 || echo "'${tool}' is missing"
+    exit 1
 done
 
 get_episode() {
@@ -51,7 +52,6 @@ while :; do
         break
     else
         get_episode && convert_episode && upload_episode && clean
-        
     fi
     sleep 10
 done
