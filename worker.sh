@@ -3,9 +3,10 @@
 API_HOST="https://roig.is-a.dev/podcasts"
 API_ENDPOINT_NEXT="${API_HOST}/api/next"
 API_ENDPOINT_CONVERTED="${API_HOST}/api/converted"
+API_ENDPOINT_CANCEL="${API_HOST}/api/cancel"
 WORKER_TOKEN=""
 AUTH="Authorization: Bearer ${WORKER_TOKEN}"
-TOOLS="jq ffmpeg"
+TOOLS="jq ffmpeg ffprobe"
 
 error() {
   echo "$@" 1>&2
@@ -24,6 +25,11 @@ get_episode() {
     echo "Got episode URL ${EPISODE_URL}"
 }
 
+get_episode_duration() {
+    local duration=$(ffprobe "$1" -show_entries format=duration -v quiet -of csv="p=0")
+    echo ${duration%.*}
+}
+
 convert_episode() {
     ffmpeg -y -i "${EPISODE_URL}" \
         -ac 1 -c:a libopus -b:a 24k \
@@ -34,6 +40,11 @@ convert_episode() {
 upload_episode() {
     curl -H "${AUTH}" -F "id=${EPISODE_ID}" \
         -F "audio=@${EPISODE_FILE}" "${API_ENDPOINT_CONVERTED}"
+}
+
+cancel_episode() {
+    curl -H "${AUTH}" -F "id=${EPISODE_ID}" \
+        "${API_ENDPOINT_CANCEL}"
 }
 
 clean() {
@@ -51,13 +62,28 @@ while :; do
     echo "Got response ${RESP}"
     if [[ "${RESP}" == "noop" ]]; then
         echo "No episodes to convert"
+        sleep 10
+        continue
     elif [[ "${RESP}" == "Unauthorized" ]]; then
         echo "Check your token"
         break
-    else
-        get_episode && convert_episode && upload_episode && clean
     fi
-    sleep 10
+
+    get_episode || { echo 'get_episode failed' ; continue; }
+
+    duration_orig=$(get_episode_duration "${EPISODE_URL}")
+
+    convert_episode || { echo 'convert_episode failed' ; cancel_episode; continue; }
+        
+    duration_conv=$(get_episode_duration "${EPISODE_FILE}")
+ 
+    if [[ "${duration_orig}" == "${duration_conv}" ]]; then
+        echo "Uploading episode"
+        upload_episode && clean
+    else
+        echo "Episode Duration check failed"
+        cancel_episode
+    fi
 done
 
 exit 0
