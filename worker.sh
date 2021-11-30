@@ -7,9 +7,13 @@ WORKER_TOKEN=""
 AUTH="Authorization: Bearer ${WORKER_TOKEN}"
 TOOLS="jq ffmpeg"
 
+error() {
+  echo "$@" 1>&2
+  exit 1
+}
+
 for tool in ${TOOLS}; do
-    type "${tool}" > /dev/null 2>&1 || echo "'${tool}' is missing"
-    exit 1
+    type "${tool}" > /dev/null 2>&1 || error "ERROR: '${tool}' is missing"
 done
 
 get_episode() {
