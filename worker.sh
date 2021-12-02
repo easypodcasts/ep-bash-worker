@@ -69,14 +69,10 @@ while :; do
         break
     fi
 
-    get_episode || { echo 'get_episode failed' ; continue; }
-
+    get_episode || echo 'get_episode failed'; continue
     duration_orig=$(get_episode_duration "${EPISODE_URL}")
-
-    convert_episode || { echo "convert_episode ${EPISODE_ID} failed"; cancel_episode; continue; }
-        
+    convert_episode || echo "convert_episode ${EPISODE_ID} failed"; cancel_episode; continue
     duration_conv=$(get_episode_duration "${EPISODE_FILE}")
-    
     duration_dif=$((duration_orig-duration_conv))
 
     if [[ "${duration_dif#-}" -lt 60 ]]; then
