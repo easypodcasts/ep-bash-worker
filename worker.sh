@@ -4,7 +4,7 @@ API_HOST="https://roig.is-a.dev/podcasts"
 API_ENDPOINT_NEXT="${API_HOST}/api/next"
 API_ENDPOINT_CONVERTED="${API_HOST}/api/converted"
 API_ENDPOINT_CANCEL="${API_HOST}/api/cancel"
-WORKER_TOKEN=""
+#WORKER_TOKEN=""
 AUTH="Authorization: Bearer ${WORKER_TOKEN}"
 TOOLS="jq ffmpeg ffprobe"
 
