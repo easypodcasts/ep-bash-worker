@@ -73,15 +73,19 @@ while :; do
 
     duration_orig=$(get_episode_duration "${EPISODE_URL}")
 
-    convert_episode || { echo 'convert_episode failed' ; cancel_episode; continue; }
+    convert_episode || { echo "convert_episode ${EPISODE_ID} failed"; cancel_episode; continue; }
         
     duration_conv=$(get_episode_duration "${EPISODE_FILE}")
- 
-    if [[ "${duration_orig}" == "${duration_conv}" ]]; then
-        echo "Uploading episode"
+    
+    duration_dif=$((duration_orig-duration_conv))
+
+    if [[ "${duration_dif#-}" -lt 60 ]]; then
+        echo "Uploading episode ${EPISODE_ID}"
         upload_episode && clean
     else
-        echo "Episode Duration check failed"
+        echo "Episode ${EPISODE_ID} duration check failed"
+        echo "Before: ${duration_orig}"
+        echo "After: ${duration_conv}"
         cancel_episode
     fi
 done
