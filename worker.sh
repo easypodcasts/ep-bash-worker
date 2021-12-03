@@ -6,6 +6,7 @@ API_ENDPOINT_CONVERTED="${API_HOST}/api/converted"
 API_ENDPOINT_CANCEL="${API_HOST}/api/cancel"
 #WORKER_TOKEN=""
 AUTH="Authorization: Bearer ${WORKER_TOKEN}"
+AGENT='Mozilla/5.0 (X11; Linux x86_64; rv:94.0) Gecko/20100101 Firefox/94.0'
 TOOLS="jq ffmpeg ffprobe"
 
 error() {
@@ -26,12 +27,14 @@ get_episode() {
 }
 
 get_episode_duration() {
-    local duration=$(ffprobe "$1" -show_entries format=duration -v quiet -of csv="p=0")
+    local duration=$(ffprobe "$1" -user_agent "${AGENT}" -show_entries format=duration -v quiet -of csv="p=0")
     echo ${duration%.*}
 }
 
 convert_episode() {
     ffmpeg -y -i "${EPISODE_URL}" \
+        -v error \    
+        -user_agent "${AGENT}" \    
         -ac 1 -c:a libopus -b:a 24k \
         -apply_phase_inv 0 \
         -frame_duration 60 -application voip "${EPISODE_FILE}"
