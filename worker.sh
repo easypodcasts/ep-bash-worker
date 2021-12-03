@@ -32,9 +32,7 @@ get_episode_duration() {
 }
 
 convert_episode() {
-    ffmpeg -y -i "${EPISODE_URL}" \
-        -v error \    
-        -user_agent "${AGENT}" \    
+    ffmpeg -user_agent "${AGENT}" -y -i "${EPISODE_URL}" \
         -ac 1 -c:a libopus -b:a 24k \
         -apply_phase_inv 0 \
         -frame_duration 60 -application voip "${EPISODE_FILE}"
@@ -72,9 +70,9 @@ while :; do
         break
     fi
 
-    get_episode || echo 'get_episode failed'; continue
+    get_episode || { echo 'get_episode failed'; continue; }
     duration_orig=$(get_episode_duration "${EPISODE_URL}")
-    convert_episode || echo "convert_episode ${EPISODE_ID} failed"; cancel_episode; continue
+    convert_episode || { echo "convert_episode ${EPISODE_ID} failed"; cancel_episode; continue; }
     duration_conv=$(get_episode_duration "${EPISODE_FILE}")
     duration_dif=$((duration_orig-duration_conv))
 
